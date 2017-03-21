@@ -73,6 +73,15 @@ function createCourse(courseName, courseUnit) {
   return course;
 }
 
+function updateCourse(courseName, courseUnit, id) {
+  var updates = {
+    name: courseName,
+    unit: courseUnit
+  };
+  coursesRef.child(id).update(updates);
+  return updates;
+}
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();
@@ -107,15 +116,7 @@ router.route('/courses/:id')
     });
   })
   .put(function (req, res) {
-    var updates = {
-      name: req.body.name,
-      unit: req.body.unit
-    };
-    coursesRef.child(req.params.id).update(updates);
-    coursesRef.child(req.params.id).once('value', function (snapshot) {
-      var course = snapshot.val();
-      res.send(course);
-    });
+    res.send(updateCourse(req.body.name, req.body.unit, req.params.id));
   })
   .delete(function (req, res) {
     // TODO: two-way delete
@@ -126,7 +127,7 @@ router.route('/courses/:id')
     });
   });
 
-  // exams
+// exams
 router.route('/exams')
   .post(function (req, res) {
     // TODO: two-way add
