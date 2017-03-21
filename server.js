@@ -16,19 +16,11 @@ var config = {
   messagingSenderId: "789215569656"
 };
 firebase.initializeApp(config);
-// Get a reference to the database service
-var database = firebase.database();
-
 // Database references
 var coursesRef = firebase.database().ref('courses');
-var examsRef = firebase.database().ref('exams');
 
-// configure app to use bodyParser()
-// this will let us get the data from a POST
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-var port = process.env.PORT || 8080;        // set our port
+// local variables
+var courses = {};
 
 var defaultCourseScale = [
   {
@@ -61,26 +53,32 @@ var defaultCourseScale = [
   }
 ];
 
+// Setup database listeners
+coursesRef.on('value', function (data) {
+  courses = data.val();
+});
+
+coursesRef.on('child_added', function (data) {
+  console.log(JSON.stringify(data.val()) + ' added!');
+});
+
+coursesRef.on('child_changed', function (data) {
+  console.log(JSON.stringify(data.val()) + ' changed!');
+});
+
+coursesRef.on('child_removed', function (data) {
+  console.log(JSON.stringify(data.val()) + ' removed!');
+});
+
+// configure app to use bodyParser()
+// this will let us get the data from a POST
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+var port = process.env.PORT || 8080;        // set our port
+
 // HELPER METHODS
 
-function createCourse(courseName, courseUnit) {
-  var course = {
-    name: courseName,
-    unit: courseUnit,
-    scales: defaultCourseScale
-  };
-  coursesRef.push(course);
-  return course;
-}
-
-function updateCourse(courseName, courseUnit, id) {
-  var updates = {
-    name: courseName,
-    unit: courseUnit
-  };
-  coursesRef.child(id).update(updates);
-  return updates;
-}
 
 // ROUTES FOR OUR API
 // =============================================================================
@@ -96,83 +94,40 @@ router.use(function (req, res, next) {
 // courses
 router.route('/courses')
   .post(function (req, res) {
-    res.send(createCourse(req.body.name, req.body.unit));
+    var course = {
+      name: req.body.name,
+      unit: req.body.unit,
+      scale: defaultCourseScale
+    }
+    var newCourseId = coursesRef.push().key;
+    var updates = {};
+    updates['/courses/' + newCourseId] = course;
+    firebase.database().ref().update(updates);
+    res.send(course);
   })
   .get(function (req, res) {
-    coursesRef.once('value').then(function (snapshot) {
-      res.send(snapshot.val());
-    });
+    res.send(courses);
   });
 
 router.route('/courses/:id')
   .get(function (req, res) {
-    coursesRef.child(req.params.id).once('value', function (snapshot) {
-      var course = snapshot.val();
-      // TODO: sum totals, compute percentage, and figure out grades here
-      course.letterGrade = 'B+';
-      course.numericGrade = '3.3';
-      course.percentage = 88.21;
-      res.send(course);
-    });
+    var courseId = req.params.id;
+    res.send(courses[courseId]);
   })
   .put(function (req, res) {
-    res.send(updateCourse(req.body.name, req.body.unit, req.params.id));
+    var courseId = req.params.id;
+    var course = courses[courseId];
+    if (req.body.name) course.name = req.body.name;
+    if (req.body.unit) course.unit = req.body.unit;
+    res.send(course);
   })
   .delete(function (req, res) {
-    // TODO: two-way delete
-    coursesRef.child(req.params.id).once('value', function (snapshot) {
-      var course = snapshot.val()[req.params.id];
-      coursesRef.child(req.params.id).remove();
-      res.send(course);
-    });
-  });
-
-// exams
-router.route('/exams')
-  .post(function (req, res) {
-    // TODO: two-way add
-    var courseId = -1; // TODO
-    var exam = {
-      name: req.body.name,
-      earnedScore: req.body.earnedScore,
-      maxScore: req.body.maxScore,
-      courses: courseId
-    };
-    examsRef.push(exam);
-    res.send(exam);
-  })
-  .get(function (req, res) {
-    examsRef.once('value').then(function (snapshot) {
-      res.send(snapshot.val());
-    });
-  });
-
-router.route('/exams/:id')
-  .get(function (req, res) {
-    examsRef.child(req.params.id).once('value', function (snapshot) {
-      var exam = snapshot.val();
-      res.send(exam);
-    });
-  })
-  .put(function (req, res) {
-    var updates = {
-      name: req.body.name,
-      earnedScore: req.body.earnedScore,
-      maxScore: req.body.maxScore
-    };
-    examsRef.child(req.params.id).update(updates);
-    examsRef.child(req.params.id).once('value', function (snapshot) {
-      var exam = snapshot.val();
-      res.send(exam);
-    });
-  })
-  .delete(function (req, res) {
-    // TODO: two-way delete
-    examsRef.child(req.params.id).once('value', function (snapshot) {
-      var exam = snapshot.val()[req.params.id];
-      examsRef.child(req.params.id).remove();
-      res.send(exam);
-    });
+    var courseId = req.params.id;
+    var course = courses[courseId];
+    var updates = {};
+    updates['/courses/' + courseId] = null;
+    firebase.database().ref().update(updates);
+    res.send(course);
   });
 
 // REGISTER OUR ROUTES
