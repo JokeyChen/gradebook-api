@@ -17,10 +17,13 @@ var config = {
 };
 firebase.initializeApp(config);
 // Database references
-var coursesRef = firebase.database().ref('courses');
+var database = firebase.database();
+var coursesRef = database.ref('courses');
+var homeworksRef = database.ref('homeworks');
 
 // local variables
 var courses = {};
+var homeworks = {};
 
 var defaultCourseScale = [
   {
@@ -70,6 +73,22 @@ coursesRef.on('child_removed', function (data) {
   console.log(JSON.stringify(data.val()) + ' removed!');
 });
 
+homeworksRef.on('value', function (data) {
+  homeworks = data.val();
+});
+
+homeworksRef.on('child_added', function (data) {
+  console.log(JSON.stringify(data.val()) + ' added!');
+});
+
+homeworksRef.on('child_changed', function (data) {
+  console.log(JSON.stringify(data.val()) + ' changed!');
+});
+
+homeworksRef.on('child_removed', function (data) {
+  console.log(JSON.stringify(data.val()) + ' removed!');
+});
+
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -96,8 +115,7 @@ router.route('/courses')
   .post(function (req, res) {
     var course = {
       name: req.body.name,
-      unit: req.body.unit,
-      scale: defaultCourseScale
+      unit: req.body.unit
     }
     var newCourseId = coursesRef.push().key;
     var updates = {};
@@ -128,6 +146,49 @@ router.route('/courses/:id')
     updates['/courses/' + courseId] = null;
     firebase.database().ref().update(updates);
     res.send(course);
+  });
+
+// homeworks
+router.route('/homeworks')
+  .post(function (req, res) {
+    var homework = {
+      name: req.body.name,
+      earnedScore: req.body.earnedScore,
+      maxScore: req.body.maxScore,
+      course: req.body.course
+    }
+    var newHomeworkId = homeworksRef.push().key;
+    var updates = {};
+    updates['/homeworks/' + newHomeworkId] = homework;
+    updates['/courses/' + req.body.course + '/homeworks/' + newHomeworkId] = true;
+    firebase.database().ref().update(updates);
+    res.send(homework);
+  })
+  .get(function (req, res) {
+    res.send(homeworks);
+  });
+
+router.route('/homeworks/:id')
+  .get(function (req, res) {
+    var homeworkId = req.params.id;
+    res.send(homeworks[homeworkId]);
+  })
+  .put(function (req, res) {
+    var homeworkId = req.params.id;
+    var homework = homeworks[homeworkId];
+    if (req.body.name) homework.name = req.body.name;
+    if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
+    if (req.body.maxScore) homework.maxScore = req.body.maxScore;
+    res.send(homework);
+  })
+  .delete(function (req, res) {
+    var homeworkId = req.params.id;
+    var homework = homeworks[homeworkId];
+    var updates = {};
+    updates['/homeworks/' + homeworkId] = null;
+    updates['/courses/' + homework.course + '/homeworks/' + homeworkId] = null;
+    firebase.database().ref().update(updates);
+    res.send(homework);
   });
 
 // REGISTER OUR ROUTES
