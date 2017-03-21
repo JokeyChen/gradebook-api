@@ -21,6 +21,7 @@ var database = firebase.database();
 
 // Database references
 var coursesRef = firebase.database().ref('courses');
+var examsRef = firebase.database().ref('exams');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -70,14 +71,8 @@ router.use(function (req, res, next) {
   next();
 })
 
-// test routes
-router.get('/', function (req, res) {
-  res.json({ message: 'Hello World!' });
-});
-
-
-// more routes to come
-
+// CRUD
+// courses
 router.route('/courses')
   .post(function (req, res) {
     var course = {
@@ -117,12 +112,61 @@ router.route('/courses/:id')
     });
   })
   .delete(function (req, res) {
+    // TODO: two-way delete
     coursesRef.child(req.params.id).once('value', function (snapshot) {
       var course = snapshot.val()[req.params.id];
       coursesRef.child(req.params.id).remove();
       res.send(course);
     });
+  });
+
+  // exams
+router.route('/exams')
+  .post(function (req, res) {
+    // TODO: two-way add
+    var courseId = -1; // TODO
+    var exam = {
+      name: req.body.name,
+      earnedScore: req.body.earnedScore,
+      maxScore: req.body.maxScore,
+      courses: courseId
+    };
+    examsRef.push(exam);
+    res.send(exam);
   })
+  .get(function (req, res) {
+    examsRef.once('value').then(function (snapshot) {
+      res.send(snapshot.val());
+    });
+  });
+
+router.route('/exams/:id')
+  .get(function (req, res) {
+    examsRef.child(req.params.id).once('value', function (snapshot) {
+      var exam = snapshot.val();
+      res.send(exam);
+    });
+  })
+  .put(function (req, res) {
+    var updates = {
+      name: req.body.name,
+      earnedScore: req.body.earnedScore,
+      maxScore: req.body.maxScore
+    };
+    examsRef.child(req.params.id).update(updates);
+    examsRef.child(req.params.id).once('value', function (snapshot) {
+      var exam = snapshot.val();
+      res.send(exam);
+    });
+  })
+  .delete(function (req, res) {
+    // TODO: two-way delete
+    examsRef.child(req.params.id).once('value', function (snapshot) {
+      var exam = snapshot.val()[req.params.id];
+      examsRef.child(req.params.id).remove();
+      res.send(exam);
+    });
+  });
 
 // REGISTER OUR ROUTES
 // =============================================================================
