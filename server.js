@@ -61,6 +61,18 @@ var defaultCourseScale = [
   }
 ];
 
+// HELPER METHODS
+
+function createCourse(courseName, courseUnit) {
+  var course = {
+    name: courseName,
+    unit: courseUnit,
+    scales: defaultCourseScale
+  };
+  coursesRef.push(course);
+  return course;
+}
+
 // ROUTES FOR OUR API
 // =============================================================================
 var router = express.Router();
@@ -75,13 +87,7 @@ router.use(function (req, res, next) {
 // courses
 router.route('/courses')
   .post(function (req, res) {
-    var course = {
-      name: req.body.name,
-      unit: req.body.unit,
-      scales: defaultCourseScale
-    };
-    coursesRef.push(course);
-    res.send(course);
+    res.send(createCourse(req.body.name, req.body.unit));
   })
   .get(function (req, res) {
     coursesRef.once('value').then(function (snapshot) {
