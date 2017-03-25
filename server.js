@@ -19,42 +19,11 @@ firebase.initializeApp(config);
 // Database references
 var database = firebase.database();
 var coursesRef = database.ref('courses');
-var homeworksRef = database.ref('homeworks');
+var homeworksRef = database.ref('homeworks').orderByChild('course');
 
 // local variables
 var courses = {};
 var homeworks = {};
-
-var defaultCourseScale = [
-  {
-    name : "A",
-    numeric : 93
-  }, {
-    name : "A-",
-    numeric : 90
-  }, {
-    name : "B+",
-    numeric : 87
-  }, {
-    name : "B",
-    numeric : 83
-  }, {
-    name : "B-",
-    numeric : 80
-  }, {
-    name : "C+",
-    numeric : 77
-  }, {
-    name : "C",
-    numeric : 73
-  }, {
-    name : "C-",
-    numeric : 70
-  }, {
-    name : "F",
-    numeric : 0
-  }
-];
 
 // Setup database listeners
 coursesRef.on('value', function (data) {
@@ -147,49 +116,55 @@ router.route('/courses/:id')
     firebase.database().ref().update(updates);
     res.send(course);
   });
-
-// homeworks
-router.route('/homeworks')
-  .post(function (req, res) {
-    var homework = {
-      name: req.body.name,
-      earnedScore: req.body.earnedScore,
-      maxScore: req.body.maxScore,
-      course: req.body.course
-    }
-    var newHomeworkId = homeworksRef.push().key;
-    var updates = {};
-    updates['/homeworks/' + newHomeworkId] = homework;
-    updates['/courses/' + req.body.course + '/homeworks/' + newHomeworkId] = true;
-    firebase.database().ref().update(updates);
-    res.send(homework);
-  })
+router.route('/courses/:courseId/homeworks/:homeworkId')
   .get(function (req, res) {
-    res.send(homeworks);
+    var courseId = req.params.courseId;
+    var course = courses[courseId];
+    res.send({message: 'hello'});
   });
 
-router.route('/homeworks/:id')
-  .get(function (req, res) {
-    var homeworkId = req.params.id;
-    res.send(homeworks[homeworkId]);
-  })
-  .put(function (req, res) {
-    var homeworkId = req.params.id;
-    var homework = homeworks[homeworkId];
-    if (req.body.name) homework.name = req.body.name;
-    if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
-    if (req.body.maxScore) homework.maxScore = req.body.maxScore;
-    res.send(homework);
-  })
-  .delete(function (req, res) {
-    var homeworkId = req.params.id;
-    var homework = homeworks[homeworkId];
-    var updates = {};
-    updates['/homeworks/' + homeworkId] = null;
-    updates['/courses/' + homework.course + '/homeworks/' + homeworkId] = null;
-    firebase.database().ref().update(updates);
-    res.send(homework);
-  });
+// // homeworks
+// router.route('/homeworks')
+//   .post(function (req, res) {
+//     var homework = {
+//       name: req.body.name,
+//       earnedScore: req.body.earnedScore,
+//       maxScore: req.body.maxScore,
+//       course: req.body.course
+//     }
+//     var newHomeworkId = homeworksRef.push().key;
+//     var updates = {};
+//     updates['/homeworks/' + newHomeworkId] = homework;
+//     updates['/courses/' + req.body.course + '/homeworks/' + newHomeworkId] = true;
+//     firebase.database().ref().update(updates);
+//     res.send(homework);
+//   })
+//   .get(function (req, res) {
+//     res.send(homeworks);
+//   });
+//
+// router.route('/homeworks/:id')
+//   .get(function (req, res) {
+//     var homeworkId = req.params.id;
+//     res.send(homeworks[homeworkId]);
+//   })
+//   .put(function (req, res) {
+//     var homeworkId = req.params.id;
+//     var homework = homeworks[homeworkId];
+//     if (req.body.name) homework.name = req.body.name;
+//     if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
+//     if (req.body.maxScore) homework.maxScore = req.body.maxScore;
+//     res.send(homework);
+//   })
+//   .delete(function (req, res) {
+//     var homeworkId = req.params.id;
+//     var homework = homeworks[homeworkId];
+//     var updates = {};
+//     updates['/homeworks/' + homeworkId] = null;
+//     updates['/courses/' + homework.course + '/homeworks/' + homeworkId] = null;
+//     firebase.database().ref().update(updates);
+//     res.send(homework);
+//   });
 
 // REGISTER OUR ROUTES
 // =============================================================================
