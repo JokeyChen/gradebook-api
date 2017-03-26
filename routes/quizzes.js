@@ -5,7 +5,7 @@ var db = require('../database');
 router.route('/courses/:courseId/quizzes')
   .get(function (req, res) {
     var courseId = req.params.courseId;
-    db.quizzesRef.orderByChild('quizzes').equalTo(courseId).once('value', function (snapshot) {
+    db.quizzesRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
     })
   })
@@ -29,7 +29,7 @@ router.route('/courses/:courseId/quizzes/:quizId')
     var courseId = req.params.courseId;
     var quizId = req.params.quizId;
     db.quizzesRef.child(quizId).once('value', function (snapshot) {
-      if (snapshot.child('quizzes').val() == courseId) res.send(snapshot.val());
+      if (snapshot.child('course').val() == courseId) res.send(snapshot.val());
       else res.status(404).send();
     })
   })
