@@ -9,6 +9,7 @@ var courses = require('./routes/courses');
 var homeworks = require('./routes/homeworks');
 var quizzes = require('./routes/quizzes');
 var exams = require('./routes/exams');
+var listenForGradeChange = require('./database/grade');
 
 // configure app to use bodyParser()
 // this will get the data from a POST
@@ -27,6 +28,9 @@ app.use('/', courses);
 app.use('/', homeworks);
 app.use('/', quizzes);
 app.use('/', exams);
+
+// SETUP LISTENERS
+listenForGradeChange();
 
 // START THE SERVER
 // =============================================================================
