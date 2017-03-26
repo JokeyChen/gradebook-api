@@ -9,8 +9,8 @@ var courses = require('./routes/courses');
 var homeworks = require('./routes/homeworks');
 var quizzes = require('./routes/quizzes');
 var exams = require('./routes/exams');
-var scales = require('./routes/scales');
-var weights = require('./routes/weights');
+var scale = require('./routes/scale');
+var weight = require('./routes/weight');
 var gpa = require('./routes/gpa');
 var listenForGradeChange = require('./database/grade');
 
@@ -31,8 +31,8 @@ app.use('/', courses);
 app.use('/', homeworks);
 app.use('/', quizzes);
 app.use('/', exams);
-app.use('/', scales);
-app.use('/', weights);
+app.use('/', scale);
+app.use('/', weight);
 app.use('/', gpa);
 
 // SETUP LISTENERS
