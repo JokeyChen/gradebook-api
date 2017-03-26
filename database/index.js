@@ -15,5 +15,6 @@ module.exports = {
   coursesRef: database.ref('courses'),
   homeworksRef: database.ref('homeworks'),
   quizzesRef: database.ref('quizzes'),
-  examsRef: database.ref('exams')
+  examsRef: database.ref('exams'),
+  scalesRef: database.ref('scales')
 };
