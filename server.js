@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var db = require('./database');
 var courses = require('./routes/courses');
 var homeworks = require('./routes/homeworks');
+var quizzes = require('./routes/quizzes');
 
 var defaultScale = [
   { name: 'A', numeric: 93 },
@@ -128,6 +129,7 @@ router.use(function (req, res, next) {
 // =============================================================================
 app.use('/', courses);
 app.use('/', homeworks);
+app.use('/', quizzes);
 
 // START THE SERVER
 // =============================================================================
