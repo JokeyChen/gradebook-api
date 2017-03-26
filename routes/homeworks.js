@@ -7,7 +7,7 @@ router.route('/courses/:courseId/homeworks')
     var courseId = req.params.courseId;
     db.homeworksRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
-    })
+    });
   })
   .post(function (req, res) {
     var courseId = req.params.courseId;
@@ -31,7 +31,7 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
     db.homeworksRef.child(homeworkId).once('value', function (snapshot) {
       if (snapshot.child('course').val() == courseId) res.send(snapshot.val());
       else res.status(404).send();
-    })
+    });
   })
   .put(function (req, res) {
     var courseId = req.params.courseId;
@@ -45,7 +45,7 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
       updates['/homeworks/' + homeworkId] = homework;
       db.ref.update(updates);
       res.send(homework);
-    })
+    });
   })
   .delete(function (req, res) {
     var courseId = req.params.courseId;

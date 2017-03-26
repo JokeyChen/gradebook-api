@@ -7,7 +7,7 @@ router.route('/courses/:courseId/quizzes')
     var courseId = req.params.courseId;
     db.quizzesRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
-    })
+    });
   })
   .post(function (req, res) {
     var courseId = req.params.courseId;
@@ -31,7 +31,7 @@ router.route('/courses/:courseId/quizzes/:quizId')
     db.quizzesRef.child(quizId).once('value', function (snapshot) {
       if (snapshot.child('course').val() == courseId) res.send(snapshot.val());
       else res.status(404).send();
-    })
+    });
   })
   .put(function (req, res) {
     var courseId = req.params.courseId;
@@ -45,7 +45,7 @@ router.route('/courses/:courseId/quizzes/:quizId')
       updates['/quizzes/' + quizId] = quiz;
       db.ref.update(updates);
       res.send(quiz);
-    })
+    });
   })
   .delete(function (req, res) {
     var courseId = req.params.courseId;
