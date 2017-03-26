@@ -5,23 +5,7 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-var firebase = require("firebase");
-
-// Initialize Firebase
-var config = {
-  apiKey: "AIzaSyDeWRbAK8f5ZLblOI8oaXE67lNXNgD4pLM",
-  authDomain: "gradebook-353a5.firebaseapp.com",
-  databaseURL: "https://gradebook-353a5.firebaseio.com",
-  storageBucket: "gradebook-353a5.appspot.com",
-  messagingSenderId: "789215569656"
-};
-firebase.initializeApp(config);
-// Database references
-var database = firebase.database();
-var coursesRef = database.ref('courses');
-var homeworksRef = database.ref('homeworks');
-var quizzesRef = database.ref('quizzes');
-var examsRef = database.ref('exams');
+var db = require('./database');
 
 var defaultScale = [
   { name: 'A', numeric: 93 },
@@ -43,39 +27,39 @@ app.use(bodyParser.json());
 var port = process.env.PORT || 8080;        // set our port
 
 // Update courses totals when the value of homeworks, quizzes, and exams changed
-homeworksRef.on('child_added', function (snapshot) {
+db.homeworksRef.on('child_added', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-homeworksRef.on('child_changed', function (snapshot) {
+db.homeworksRef.on('child_changed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-homeworksRef.on('child_removed', function (snapshot) {
+db.homeworksRef.on('child_removed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-quizzesRef.on('child_added', function (snapshot) {
+db.quizzesRef.on('child_added', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-quizzesRef.on('child_changed', function (snapshot) {
+db.quizzesRef.on('child_changed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-quizzesRef.on('child_removed', function (snapshot) {
+db.quizzesRef.on('child_removed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-examsRef.on('child_added', function (snapshot) {
+db.examsRef.on('child_added', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-examsRef.on('child_changed', function (snapshot) {
+db.examsRef.on('child_changed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
-examsRef.on('child_removed', function (snapshot) {
+db.examsRef.on('child_removed', function (snapshot) {
   calculateGrade(snapshot.val().course);
 });
 
@@ -84,21 +68,21 @@ function calculateGrade(courseId) {
   var totalEarnedScore = 0;
   var totalMaxScore = 0;
   // homeworks
-  homeworksRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
+  db.homeworksRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
     snapshot.forEach(function (homework) {
       totalEarnedScore += homework.val().earnedScore;
       totalMaxScore += homework.val().maxScore;
     });
   });
   // quizzes
-  quizzesRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
+  db.quizzesRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
     snapshot.forEach(function (quiz) {
       totalEarnedScore += quiz.val().earnedScore;
       totalMaxScore += quiz.val().maxScore;
     });
   });
   // exams
-  examsRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
+  db.examsRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
     snapshot.forEach(function (exam) {
       totalEarnedScore += exam.val().earnedScore;
       totalMaxScore += exam.val().maxScore;
@@ -125,7 +109,7 @@ function calculateGrade(courseId) {
     }
     updates['/courses/' + courseId + '/letterGrade'] = letter;
   }
-  firebase.database().ref().update(updates);
+  db.ref.update(updates);
 }
 
 // ROUTES FOR OUR API
@@ -146,14 +130,14 @@ router.route('/courses')
       name: req.body.name,
       unit: req.body.unit
     }
-    var newCourseId = coursesRef.push().key;
+    var newCourseId = db.coursesRef.push().key;
     var updates = {};
     updates['/courses/' + newCourseId] = course;
-    firebase.database().ref().update(updates);
+    db.ref.update(updates);
     res.send(course);
   })
   .get(function (req, res) {
-    coursesRef.once('value', function (snapshot) {
+    db.coursesRef.once('value', function (snapshot) {
       res.send(snapshot.val());
     })
   });
@@ -161,47 +145,47 @@ router.route('/courses')
 router.route('/courses/:id')
   .get(function (req, res) {
     var courseId = req.params.id;
-    coursesRef.child(courseId).once('value', function (snapshot) {
+    db.coursesRef.child(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
     });
   })
   .put(function (req, res) {
     var courseId = req.params.id;
-    coursesRef.child(courseId).once('value', function (snapshot) {
+    db.coursesRef.child(courseId).once('value', function (snapshot) {
       var course = snapshot.val();
       if (req.body.name) course.name = req.body.name;
       if (req.body.unit) course.unit = req.body.unit;
       var updates = {};
       updates['/courses/' + courseId] = course;
-      firebase.database().ref().update(updates);
+      db.ref.update(updates);
       res.send(course);
     });
   })
   .delete(function (req, res) {
     var courseId = req.params.id;
-    coursesRef.child(courseId).once('value', function (snapshot) {
+    db.coursesRef.child(courseId).once('value', function (snapshot) {
       var course = snapshot.val();
       var updates = {};
       updates['/courses/' + courseId] = null;
       // delete associated homeworks
-      coursesRef.child(courseId + '/homeworks').once('value', function (snapshot) {
+      db.coursesRef.child(courseId + '/homeworks').once('value', function (snapshot) {
         snapshot.forEach(function (homework) {
           updates['/homeworks/' + homework.key] = null;
         })
       });
       // delete associated quizzes
-      coursesRef.child(courseId + '/quizzes').once('value', function (snapshot) {
+      db.coursesRef.child(courseId + '/quizzes').once('value', function (snapshot) {
         snapshot.forEach(function (quiz) {
           updates['/quizzes/' + quiz.key] = null;
         })
       });
       // delete associated exams
-      coursesRef.child(courseId + '/exams').once('value', function (snapshot) {
+      db.coursesRef.child(courseId + '/exams').once('value', function (snapshot) {
         snapshot.forEach(function (exam) {
           updates['/exams/' + exam.key] = null;
         })
       });
-      firebase.database().ref().update(updates);
+      db.ref.update(updates);
       res.send(course);
     });
   });
@@ -210,7 +194,7 @@ router.route('/courses/:id')
 router.route('/courses/:courseId/homeworks')
   .get(function (req, res) {
     var courseId = req.params.courseId;
-    homeworksRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
+    db.homeworksRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
     })
   })
@@ -222,18 +206,18 @@ router.route('/courses/:courseId/homeworks')
       maxScore: req.body.maxScore,
       course: courseId
     };
-    var newHomeworkId = homeworksRef.push().key;
+    var newHomeworkId = db.homeworksRef.push().key;
     var updates = {};
     updates['/homeworks/' + newHomeworkId] = homework;
     updates['/courses/' + courseId + '/homeworks/' + newHomeworkId] = true;
-    firebase.database().ref().update(updates);
+    db.ref.update(updates);
     res.send(homework);
   });
 router.route('/courses/:courseId/homeworks/:homeworkId')
   .get(function (req, res) {
     var courseId = req.params.courseId;
     var homeworkId = req.params.homeworkId;
-    homeworksRef.child(homeworkId).once('value', function (snapshot) {
+    db.homeworksRef.child(homeworkId).once('value', function (snapshot) {
       if (snapshot.child('course').val() == courseId) res.send(snapshot.val());
       else res.status(404).send();
     })
@@ -241,14 +225,14 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
   .put(function (req, res) {
     var courseId = req.params.courseId;
     var homeworkId = req.params.homeworkId;
-    homeworksRef.child(homeworkId).once('value', function (snapshot) {
+    db.homeworksRef.child(homeworkId).once('value', function (snapshot) {
       var homework = snapshot.val();
       if (req.body.name) homework.name = req.body.name;
       if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
       if (req.body.maxScore) homework.maxScore = req.body.maxScore;
       var updates = {};
       updates['/homeworks/' + homeworkId] = homework;
-      firebase.database().ref().update(updates);
+      db.ref.update(updates);
       res.send(homework);
     })
   })
@@ -258,7 +242,7 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
     var updates = {};
     updates['/homeworks/' + homeworkId] = null;
     updates['/courses/' + courseId + '/homeworks/' + homeworkId] = null;
-    firebase.database().ref().update(updates);
+    db.ref.update(updates);
     res.send();
   });
 
