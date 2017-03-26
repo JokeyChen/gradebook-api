@@ -11,6 +11,7 @@ var quizzes = require('./routes/quizzes');
 var exams = require('./routes/exams');
 var scales = require('./routes/scales');
 var weights = require('./routes/weights');
+var gpa = require('./routes/gpa');
 var listenForGradeChange = require('./database/grade');
 
 // configure app to use bodyParser()
@@ -32,6 +33,7 @@ app.use('/', quizzes);
 app.use('/', exams);
 app.use('/', scales);
 app.use('/', weights);
+app.use('/', gpa);
 
 // SETUP LISTENERS
 listenForGradeChange();
