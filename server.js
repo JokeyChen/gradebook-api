@@ -244,9 +244,8 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
     homeworksRef.child(homeworkId).once('value', function (snapshot) {
       var homework = snapshot.val();
       if (req.body.name) homework.name = req.body.name;
-      // TODO: uncomment when calculating total is handled correctly
-      // if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
-      // if (req.body.maxScore) homework.maxScore = req.body.maxScore;
+      if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
+      if (req.body.maxScore) homework.maxScore = req.body.maxScore;
       var updates = {};
       updates['/homeworks/' + homeworkId] = homework;
       firebase.database().ref().update(updates);
