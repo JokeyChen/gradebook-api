@@ -17,8 +17,7 @@ router.route('/courses')
   })
   .get(function (req, res) {
     db.coursesRef.once('value', function (snapshot) {
-      if (snapshot.val()) res.send(snapshot.val());
-      else res.status(404).send();
+      res.send(snapshot.val());
     });
   });
 

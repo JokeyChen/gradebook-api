@@ -16,13 +16,17 @@ router.route('/courses/:courseId/weight')
       if (snapshot.val()) {
         // weight exist, override the weight
         db.weightsRef.child(snapshot.val()).once('value', function (weightSnap) {
-          var weight = weightSnap.val();
-          weight.weight = req.body;
-          var weightId = weightSnap.key;
-          var updates = {};
-          updates['/weights/' + weightId] = weight;
-          db.ref.update(updates);
-          res.send(weight);
+          if (weightSnap.val()) {
+            var weight = weightSnap.val();
+            weight.weight = req.body;
+            var weightId = weightSnap.key;
+            var updates = {};
+            updates['/weights/' + weightId] = weight;
+            db.ref.update(updates);
+            res.send(weight);
+          } else {
+            res.status(404).send();
+          }
         });
       } else {
         // weight does not exist, create a new one
@@ -43,25 +47,33 @@ router.route('/courses/:courseId/weight')
     var courseId = req.params.courseId;
     db.coursesRef.child(courseId + '/weight').once('value', function (snapshot) {
       db.weightsRef.child(snapshot.val()).once('value', function (weightSnap) {
-        var weight = weightSnap.val();
-        var weightId = weightSnap.key;
-        weight.weight = req.body;
-        var updates = {};
-        updates['/weights/' + weightId] = weight;
-        db.ref.update(updates);
-        res.send(weight);
+        if (weightSnap.val()) {
+          var weight = weightSnap.val();
+          var weightId = weightSnap.key;
+          weight.weight = req.body;
+          var updates = {};
+          updates['/weights/' + weightId] = weight;
+          db.ref.update(updates);
+          res.send(weight);
+        } else {
+          res.status(404).send();
+        }
       });
     });
   })
   .delete(function (req, res) {
     var courseId = req.params.courseId;
     db.coursesRef.child(courseId + '/weight').once('value', function (snapshot) {
-      var weightId = snapshot.val();
-      var updates = {};
-      updates['/weights/' + weightId] = null;
-      updates['/courses/' + courseId + '/weight'] = null;
-      db.ref.update(updates);
-      res.send();
+      if (snapshot.val()) {
+        var weightId = snapshot.val();
+        var updates = {};
+        updates['/weights/' + weightId] = null;
+        updates['/courses/' + courseId + '/weight'] = null;
+        db.ref.update(updates);
+        res.send();
+      } else {
+        res.status(404).send();
+      }
     });
   });
 

@@ -37,14 +37,18 @@ router.route('/courses/:courseId/quizzes/:quizId')
     var courseId = req.params.courseId;
     var quizId = req.params.quizId;
     db.quizzesRef.child(quizId).once('value', function (snapshot) {
-      var quiz = snapshot.val();
-      if (req.body.name) quiz.name = req.body.name;
-      if (req.body.earnedScore) quiz.earnedScore = req.body.earnedScore;
-      if (req.body.maxScore) quiz.maxScore = req.body.maxScore;
-      var updates = {};
-      updates['/quizzes/' + quizId] = quiz;
-      db.ref.update(updates);
-      res.send(quiz);
+      if (snapshot.val()) {
+        var quiz = snapshot.val();
+        if (req.body.name) quiz.name = req.body.name;
+        if (req.body.earnedScore) quiz.earnedScore = req.body.earnedScore;
+        if (req.body.maxScore) quiz.maxScore = req.body.maxScore;
+        var updates = {};
+        updates['/quizzes/' + quizId] = quiz;
+        db.ref.update(updates);
+        res.send(quiz);
+      } else {
+        res.status(404).send();
+      }
     });
   })
   .delete(function (req, res) {

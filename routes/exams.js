@@ -37,14 +37,18 @@ router.route('/courses/:courseId/exams/:examId')
     var courseId = req.params.courseId;
     var examId = req.params.examId;
     db.examsRef.child(examId).once('value', function (snapshot) {
-      var exam = snapshot.val();
-      if (req.body.name) exam.name = req.body.name;
-      if (req.body.earnedScore) exam.earnedScore = req.body.earnedScore;
-      if (req.body.maxScore) exam.maxScore = req.body.maxScore;
-      var updates = {};
-      updates['/exams/' + examId] = exam;
-      db.ref.update(updates);
-      res.send(exam);
+      if (snapshot.val()) {
+        var exam = snapshot.val();
+        if (req.body.name) exam.name = req.body.name;
+        if (req.body.earnedScore) exam.earnedScore = req.body.earnedScore;
+        if (req.body.maxScore) exam.maxScore = req.body.maxScore;
+        var updates = {};
+        updates['/exams/' + examId] = exam;
+        db.ref.update(updates);
+        res.send(exam);
+      } else {
+        res.status(404).send();
+      }
     });
   })
   .delete(function (req, res) {

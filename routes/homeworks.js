@@ -37,14 +37,18 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
     var courseId = req.params.courseId;
     var homeworkId = req.params.homeworkId;
     db.homeworksRef.child(homeworkId).once('value', function (snapshot) {
-      var homework = snapshot.val();
-      if (req.body.name) homework.name = req.body.name;
-      if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
-      if (req.body.maxScore) homework.maxScore = req.body.maxScore;
-      var updates = {};
-      updates['/homeworks/' + homeworkId] = homework;
-      db.ref.update(updates);
-      res.send(homework);
+      if (snapshot.val()) {
+        var homework = snapshot.val();
+        if (req.body.name) homework.name = req.body.name;
+        if (req.body.earnedScore) homework.earnedScore = req.body.earnedScore;
+        if (req.body.maxScore) homework.maxScore = req.body.maxScore;
+        var updates = {};
+        updates['/homeworks/' + homeworkId] = homework;
+        db.ref.update(updates);
+        res.send(homework);
+      } else {
+        res.status(404).send();
+      }
     });
   })
   .delete(function (req, res) {
