@@ -123,7 +123,6 @@ function listenForGradeChange() {
             break;
           }
         }
-        console.log(courseId, letter);
         updates['/courses/' + courseId + '/letterGrade'] = letter;
         db.ref.update(updates);
       });
