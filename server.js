@@ -21,12 +21,6 @@ var port = process.env.PORT || 8080;        // set our port
 // =============================================================================
 var router = express.Router();
 
-// middleware to use for all requests
-router.use(function (req, res, next) {
-  console.log('Receiving a ' + req.method + ' request from ' + req.path);
-  next();
-})
-
 // REGISTER THE ROUTES
 // =============================================================================
 app.use('/', courses);
