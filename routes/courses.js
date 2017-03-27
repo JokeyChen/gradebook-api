@@ -13,7 +13,7 @@ router.route('/courses')
     var updates = {};
     updates['/courses/' + newCourseId] = course;
     db.ref.update(updates);
-    res.send(course);
+    res.send(newCourseId);
   })
   .get(function (req, res) {
     db.coursesRef.once('value', function (snapshot) {

@@ -39,7 +39,7 @@ router.route('/courses/:courseId/scale')
         updates['/scales/' + newScaleId] = scale;
         updates['/courses/' + courseId + '/scale/'] = newScaleId;
         db.ref.update(updates);
-        res.send(scale);
+        res.send(newScaleId);
       }
     });
   })

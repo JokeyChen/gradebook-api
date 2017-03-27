@@ -22,7 +22,7 @@ router.route('/courses/:courseId/homeworks')
     updates['/homeworks/' + newHomeworkId] = homework;
     updates['/courses/' + courseId + '/homeworks/' + newHomeworkId] = true;
     db.ref.update(updates);
-    res.send(homework);
+    res.send(newHomeworkId);
   });
 router.route('/courses/:courseId/homeworks/:homeworkId')
   .get(function (req, res) {

@@ -39,7 +39,7 @@ router.route('/courses/:courseId/weight')
         updates['/weights/' + newWeightId] = weight;
         updates['/courses/' + courseId + '/weight/'] = newWeightId;
         db.ref.update(updates);
-        res.send(weight);
+        res.send(newWeightId);
       }
     });
   })
