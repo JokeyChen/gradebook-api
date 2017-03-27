@@ -45,7 +45,7 @@ router.route('/courses/:courseId/homeworks/:homeworkId')
         var updates = {};
         updates['/homeworks/' + homeworkId] = homework;
         db.ref.update(updates);
-        res.send(homework);
+        res.send(homeworkId);
       } else {
         res.status(404).send();
       }

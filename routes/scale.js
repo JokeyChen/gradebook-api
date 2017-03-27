@@ -54,7 +54,7 @@ router.route('/courses/:courseId/scale')
           var updates = {};
           updates['/scales/' + scaleId] = scale;
           db.ref.update(updates);
-          res.send(scale);
+          res.send(scaleId);
         } else {
           res.status(404).send();
         }

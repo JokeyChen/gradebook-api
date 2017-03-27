@@ -45,7 +45,7 @@ router.route('/courses/:courseId/quizzes/:quizId')
         var updates = {};
         updates['/quizzes/' + quizId] = quiz;
         db.ref.update(updates);
-        res.send(quiz);
+        res.send(quizId);
       } else {
         res.status(404).send();
       }

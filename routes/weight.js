@@ -54,7 +54,7 @@ router.route('/courses/:courseId/weight')
           var updates = {};
           updates['/weights/' + weightId] = weight;
           db.ref.update(updates);
-          res.send(weight);
+          res.send(weightId);
         } else {
           res.status(404).send();
         }
