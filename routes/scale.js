@@ -5,12 +5,14 @@ var db = require('../database');
 router.route('/courses/:courseId/scale')
   .get(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     db.scalesRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
     });
   })
   .post(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     // check if scale exist first
     db.coursesRef.child(courseId + '/scale').once('value', function (snapshot) {
       if (snapshot.val()) {
@@ -45,6 +47,7 @@ router.route('/courses/:courseId/scale')
   })
   .put(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     db.coursesRef.child(courseId + '/scale').once('value', function (snapshot) {
       db.scalesRef.child(snapshot.val()).once('value', function (scaleSnap) {
         if (scaleSnap.val()) {
@@ -63,6 +66,7 @@ router.route('/courses/:courseId/scale')
   })
   .delete(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     db.coursesRef.child(courseId + '/scale').once('value', function (snapshot) {
       if (snapshot.val()) {
         var scaleId = snapshot.val();

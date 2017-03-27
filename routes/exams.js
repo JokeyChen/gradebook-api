@@ -5,12 +5,14 @@ var db = require('../database');
 router.route('/courses/:courseId/exams')
   .get(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     db.examsRef.orderByChild('course').equalTo(courseId).once('value', function (snapshot) {
       res.send(snapshot.val());
     });
   })
   .post(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     var exam = {
       name: req.body.name,
       earnedScore: req.body.earnedScore,
@@ -27,6 +29,7 @@ router.route('/courses/:courseId/exams')
 router.route('/courses/:courseId/exams/:examId')
   .get(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     var examId = req.params.examId;
     db.examsRef.child(examId).once('value', function (snapshot) {
       if (snapshot.child('course').val() == courseId) res.send(snapshot.val());
@@ -35,6 +38,7 @@ router.route('/courses/:courseId/exams/:examId')
   })
   .put(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     var examId = req.params.examId;
     db.examsRef.child(examId).once('value', function (snapshot) {
       if (snapshot.val()) {
@@ -53,6 +57,7 @@ router.route('/courses/:courseId/exams/:examId')
   })
   .delete(function (req, res) {
     var courseId = req.params.courseId;
+    // TODO: check courseId is valid
     var examId = req.params.examId;
     var updates = {};
     updates['/exams/' + examId] = null;
