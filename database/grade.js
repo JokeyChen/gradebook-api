@@ -19,6 +19,16 @@ var defaultWeight = {
 };
 
 function listenForGradeChange() {
+  // remove the invalid courses populated by recalculating grades
+  db.coursesRef.on('child_added', function (snapshot) {
+    if (!snapshot.val().name && !snapshot.val().unit) {
+      var updates = {};
+      updates['/courses/' + snapshot.key] = null;
+      db.ref.update(updates);
+    } else {
+      calculateGrade(snapshot.key);
+    }
+  });
 
   // Update courses totals when the value of homeworks, quizzes, and exams changed
   db.homeworksRef.on('child_added', function (snapshot) {

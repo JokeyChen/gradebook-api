@@ -53,23 +53,21 @@ router.route('/courses/:id')
         var updates = {};
         updates['/courses/' + courseId] = null;
         // delete associated homeworks
-        db.coursesRef.child(courseId + '/homeworks').once('value', function (snapshot) {
-          snapshot.forEach(function (homework) {
-            updates['/homeworks/' + homework.key] = null;
-          })
+        snapshot.child('homeworks').forEach(function (homeworkSnap) {
+          updates['/homeworks/' + homeworkSnap.key] = null;
         });
         // delete associated quizzes
-        db.coursesRef.child(courseId + '/quizzes').once('value', function (snapshot) {
-          snapshot.forEach(function (quiz) {
-            updates['/quizzes/' + quiz.key] = null;
-          })
+        snapshot.child('quizzes').forEach(function (quizSnap) {
+          updates['/quizzes/' + quizSnap.key] = null;
         });
         // delete associated exams
-        db.coursesRef.child(courseId + '/exams').once('value', function (snapshot) {
-          snapshot.forEach(function (exam) {
-            updates['/exams/' + exam.key] = null;
-          })
+        snapshot.child('exams').forEach(function (examSnap) {
+          updates['/exams/' + examSnap.key] = null;
         });
+        // delete associated scale
+        updates['/scales/' + snapshot.child('scale').val()] = null;
+        // delete associated weight
+        updates['/weights/' + snapshot.child('weight').val()] = null;
         db.ref.update(updates);
         res.send();
       } else {
