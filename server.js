@@ -12,6 +12,7 @@ var exams = require('./routes/exams');
 var scale = require('./routes/scale');
 var weight = require('./routes/weight');
 var gpa = require('./routes/gpa');
+var auth = require('./routes/auth');
 var listenForGradeChange = require('./database/grade');
 
 // configure app to use bodyParser()
@@ -27,6 +28,7 @@ var router = express.Router();
 
 // REGISTER THE ROUTES
 // =============================================================================
+app.use('/', auth);
 app.use('/', courses);
 app.use('/', homeworks);
 app.use('/', quizzes);

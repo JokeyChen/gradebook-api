@@ -17,5 +17,7 @@ module.exports = {
   quizzesRef: database.ref('quizzes'),
   examsRef: database.ref('exams'),
   scalesRef: database.ref('scales'),
-  weightsRef: database.ref('weights')
+  weightsRef: database.ref('weights'),
+  usersRef: database.ref('users'),
+  auth: firebase.auth()
 };
